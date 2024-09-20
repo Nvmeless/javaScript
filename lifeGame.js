@@ -2,20 +2,35 @@ class LifeGame {
 
     toto = 5;
     board = null;
-    constructor(tata){
-        console.log(this.toto)
-        this.toto = tata;
-        console.log(this.toto)
+    constructor(x,y ){
+        this.board = new Board(x,y);
 
+
+        this.board.displayBoard();
     }
     
-    //Une methode qui creer un tableau de x / y
-       createBoard = (x, y) => {
+
+}
+
+class Board {
+    xSize = 0;
+    ySize = 0;
+    
+    board = null
+    constructor(x,y){
+
+        this.xSize = x;
+        this.ySize = y;
+
+        this.createBoard();
+    }
+
+    createBoard = () => {
         this.board = [];
         let row = [];
-        for(let i = 0; i < y ; i++){
+        for(let i = 0; i < this.ySize ; i++){
             row = [];
-            for(let j = 0; j < x; j++){
+            for(let j = 0; j < this.xSize; j++){
 
 
                 row.push(new Cell(j,i,false))
@@ -23,30 +38,46 @@ class LifeGame {
             }
             this.board.push(row);
         }
-        console.log(this.board);
-       } 
-
-
-    //une methode qui recupere l'index dans un tableau par rapport a des coordonnées x et y
-
-       getCell = (x, y) => {
+    } 
+       
+    getCell = (x, y) => {
         return this.board[y][x];
-       }
+    }
 
 
 
-    
+    displayBoard = () => {
+        let currentDiv = document.getElementById("board");;
+        let newDiv = null;
+        let newContent = null;
+        let newDivRow = null;
+        
+        for(let i = 0; i < this.ySize ; i++){
+        newDivRow = document.createElement("div")
+        
+        newDivRow.className =  "row";
+            for(let j = 0; j < this.xSize; j++){
 
+            newDiv = document.createElement("div");
 
+            newContent = document.createTextNode("X");
 
+        // add the text node to the newly created div
+            newDiv.appendChild(newContent);
+            newDivRow.appendChild(newDiv);
 
+            }
+        currentDiv.appendChild(newDivRow);
 
+        
+    }
 
-
+    }
 
 
 
 }
+
 
 class Cell {
     alive= false;
