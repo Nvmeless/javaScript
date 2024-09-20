@@ -31,9 +31,8 @@ class Board {
         for(let i = 0; i < this.ySize ; i++){
             row = [];
             for(let j = 0; j < this.xSize; j++){
-
-
-                row.push(new Cell(j,i,false))
+            
+                row.push(new Cell(j,i,(Math.random() > .5)))
 
             }
             this.board.push(row);
@@ -59,8 +58,8 @@ class Board {
             for(let j = 0; j < this.xSize; j++){
 
             newDiv = document.createElement("div");
-
-            newContent = document.createTextNode("X");
+            
+            newContent = document.createTextNode(this.getCell(j,i).isAlive() ? 'X' : "O");
 
         // add the text node to the newly created div
             newDiv.appendChild(newContent);
@@ -84,8 +83,12 @@ class Cell {
     constructor(x,y, alive){
         this.x = x;
         this.y = y;
+        this.alive = alive;
     }
-
+    
+    isAlive = () => {
+        return this.alive;
+    }
 }
 
 export default LifeGame;
