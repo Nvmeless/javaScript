@@ -32,7 +32,7 @@ class Board {
             row = [];
             for(let j = 0; j < this.xSize; j++){
             
-                row.push(new Cell(j,i,(Math.random() > .5)))
+                row.push(new Cell(j,i,(Math.random() > .8), this))
 
             }
             this.board.push(row);
@@ -50,19 +50,23 @@ class Board {
         let newDiv = null;
         let newContent = null;
         let newDivRow = null;
-        
+        let cell = null;
         for(let i = 0; i < this.ySize ; i++){
         newDivRow = document.createElement("div")
         
         newDivRow.className =  "row";
             for(let j = 0; j < this.xSize; j++){
-
+            cell = this.getCell(j,i)
             newDiv = document.createElement("div");
-            
-            newContent = document.createTextNode(this.getCell(j,i).isAlive() ? 'X' : "O");
-
+            newDiv.className = cell.isAlive() ? "dead" : "alive";
+            cell.setElement(newDiv);
+            newContent = document.createTextNode(cell.isAlive() ? 'X' : "O");
         // add the text node to the newly created div
             newDiv.appendChild(newContent);
+            newDiv.addEventListener("click", this.getCell(j,i).click)
+            
+            
+            // newDiv.className = "case";
             newDivRow.appendChild(newDiv);
 
             }
@@ -73,21 +77,50 @@ class Board {
 
     }
 
+refreshBoard = () => {
+        let currentDiv = document.getElementById("board");;
+        let cell = null;
+        for(let i = 0; i < this.ySize ; i++){
+            for(let j = 0; j < this.xSize; j++){
+        
+            cell = this.getCell(j,i)
+            cell.getElement().className = cell.isAlive() ? "dead" : "alive";
+            }
 
 
-}
+            }
+
+        
+    }
+
+    }
+
+
 
 
 class Cell {
     alive= false;
-    constructor(x,y, alive){
+    elt = null;
+    constructor(x,y, alive,board){
         this.x = x;
         this.y = y;
         this.alive = alive;
+        this.board = board;
     }
-    
+    setElement = (elt) => {
+        this.elt = elt
+        
+    }
+     getElement = () => {
+        return this.elt
+        
+    }
     isAlive = () => {
         return this.alive;
+    }
+    click = () => {
+        this.alive = !this.alive
+        this.board.refreshBoard()
     }
 }
 

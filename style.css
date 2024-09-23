@@ -2,3 +2,15 @@
 
     display: flex;
 }
+.alive{
+    height: 50px;
+    min-width: 50px;
+    border: 1px solid black;
+}
+.dead{
+    height: 50px;
+    min-width: 50px;
+    border: 1px solid black;
+    background-color: black;
+    color: white;
+}
