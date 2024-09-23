@@ -2,13 +2,29 @@ class LifeGame {
 
     toto = 5;
     board = null;
+    turn = 0;
     constructor(x,y ){
         this.board = new Board(x,y);
 
 
         this.board.displayBoard();
+        //  this.board.applyRule((cell, neibourghs) => {
+
+        //             console.log(cell, neibourghs)
+        // });
     }
+
+
+
+
     
+    passTurn = () => {
+        this.turn++
+        this.board.applyRule((cell, neibourghs) => {
+
+                    console.log(cell, neibourghs)
+        });
+    }
 
 }
 
@@ -23,6 +39,7 @@ class Board {
         this.ySize = y;
 
         this.createBoard();
+       
     }
 
     createBoard = () => {
@@ -32,7 +49,7 @@ class Board {
             row = [];
             for(let j = 0; j < this.xSize; j++){
             
-                row.push(new Cell(j,i,(Math.random() > .8), this))
+                row.push(new Cell(j,i,(Math.random() > 1), this))
 
             }
             this.board.push(row);
@@ -40,13 +57,16 @@ class Board {
     } 
        
     getCell = (x, y) => {
-        return this.board[y][x];
+        if(x >= 0 && y >= 0 && y < this.ySize && x < this.xSize ){
+            return this.board[y][x];
+        }
+        return null
     }
 
 
 
     displayBoard = () => {
-        let currentDiv = document.getElementById("board");;
+        let currentDiv = document.getElementById("board");
         let newDiv = null;
         let newContent = null;
         let newDivRow = null;
@@ -60,9 +80,9 @@ class Board {
             newDiv = document.createElement("div");
             newDiv.className = cell.isAlive() ? "dead" : "alive";
             cell.setElement(newDiv);
-            newContent = document.createTextNode(cell.isAlive() ? 'X' : "O");
+            // newContent = document.createTextNode(cell.isAlive() ? 'X' : "O");
         // add the text node to the newly created div
-            newDiv.appendChild(newContent);
+            // newDiv.appendChild(newContent);
             newDiv.addEventListener("click", this.getCell(j,i).click)
             
             
@@ -75,21 +95,56 @@ class Board {
         
     }
 
-    //Function Get AllVoisin (Recupere les cases voisine d'une case x,y)
 
 
-
-    //Function qui verifie si la case doit etre vivante en fonction de ses 8 voisins
     }
+    //Function Get AllVoisin (Recupere les cases voisine d'une case x,y)
+    getNeibourgh = (cell) => {
+        // cell.x, cell.y
+        let x = cell.x;
+        let y = cell.y;
+        let cells = []; 
+        let currentCell;
+        for(let i = -1; i <=1 ; i++){
+        for(let j = -1; j <=1 ; j++){
+            if(i !== 0 || j !==0){
+                currentCell = this.getCell(x + i,y + j);
+                if(currentCell && currentCell !== null){
+                    cells.push(currentCell);
+                }
+            }
+        }
+       
+        }
+        return cells
+    }
+    //Function qui verifie si la case doit etre vivante en fonction de ses 8 voisins
+
+    getAliveNeibourgh = (cell) => {
+        // console.log(this.getNeibourgh(cell));
+        let neibourghs = this.getNeibourgh(cell);
+        return neibourghs.filter((neibourgh) => {
+            return neibourgh.isAlive();
+        });
+    }
+    
+    applyRule = (callback) => {
+        this.board.map((x) =>{
+            x.map((cell) =>{
+                callback(cell,this.getAliveNeibourgh(cell))
+            })
+        })
+    }
+
 
 refreshBoard = () => {
         let currentDiv = document.getElementById("board");;
         let cell = null;
         for(let i = 0; i < this.ySize ; i++){
             for(let j = 0; j < this.xSize; j++){
-        
-            cell = this.getCell(j,i)
-            cell.getElement().className = cell.isAlive() ? "dead" : "alive";
+                cell = this.getCell(j,i)
+                
+                cell.getElement().className = cell.isAlive() ? "dead" : "alive";
             }
 
 
@@ -98,8 +153,8 @@ refreshBoard = () => {
         
     }
 
-    }
-
+    
+}
 
 
 
