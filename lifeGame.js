@@ -24,8 +24,12 @@ class LifeGame {
                 cell.die()
             }
         });
-        // this.board.displaySave();
+        this.board.displaySave();
         this.board.refreshBoard();
+    }
+
+    import = () => {
+        this.board.importFromInput('{"board":[[{"x":0,"y":0,"alive":false},{"x":1,"y":0,"alive":false},{"x":2,"y":0,"alive":false},{"x":3,"y":0,"alive":false},{"x":4,"y":0,"alive":false}],[{"x":0,"y":1,"alive":false},{"x":1,"y":1,"alive":false},{"x":2,"y":1,"alive":false},{"x":3,"y":1,"alive":false},{"x":4,"y":1,"alive":false}],[{"x":0,"y":2,"alive":false},{"x":1,"y":2,"alive":false},{"x":2,"y":2,"alive":false},{"x":3,"y":2,"alive":false},{"x":4,"y":2,"alive":false}],[{"x":0,"y":3,"alive":false},{"x":1,"y":3,"alive":true},{"x":2,"y":3,"alive":true},{"x":3,"y":3,"alive":false},{"x":4,"y":3,"alive":false}],[{"x":0,"y":4,"alive":false},{"x":1,"y":4,"alive":true},{"x":2,"y":4,"alive":true},{"x":3,"y":4,"alive":false},{"x":4,"y":4,"alive":false}]],"ySize":5,"xSize":5}')
     }
 
 }
@@ -37,7 +41,7 @@ class Board {
     clickDown = false;
     containerName = 'board'
     board = null
-
+    randomFactor = 20;
 
     constructor(x, y, containerName = "board") {
         this.containerName = containerName;
@@ -48,15 +52,13 @@ class Board {
 
     }
 
-    createBoard = () => {
+    createBoard = (save = null) => {
         this.board = [];
         let row = [];
         for (let i = 0; i < this.ySize; i++) {
             row = [];
             for (let j = 0; j < this.xSize; j++) {
-
-                row.push(new Cell(j, i, (Math.random() > .8), this))
-
+                row.push(new Cell(save ? save[i][j] : null, j, i, (Math.random() > (1 - this.randomFactor / 100)), this))
             }
             this.board.push(row);
         }
@@ -70,11 +72,33 @@ class Board {
         }
     }
     getBoardExport = () => {
+        return JSON.stringify(this.exportBoard(), (x, y, z) => {
+            if (y !== undefined && y.hasOwnProperty('board')) {
+                let resultBoard = y?.board.map((row) => {
+                    return row.map((cell) => {
+                        return cell.export()
+                    })
+                });
+                let result = {
+                    board: resultBoard,
+                    ySize: y.ySize,
+                    xSize: y.xSize
+                }
+                return result
+            }
+            else {
+                return y
+            }
 
-        console.log(this.exportBoard());
-        // return JSON.stringify(this.exportBoard());
+        });
     }
-
+    importFromInput = (stringJson) => {
+        let datas = JSON.parse(stringJson);
+        this.xSize = datas.xSize;
+        this.ySize = datas.ySize;
+        this.createBoard(datas.board)
+        this.displayBoard();
+    }
 
     importBoard = (boardExport) => {
         this.board = boardExport.board;
@@ -89,7 +113,7 @@ class Board {
         return null
     }
     displaySave = () => {
-        document.getElementById(this.saveContainerName).innerHTML(this.getBoardExport());
+        document.getElementById(this.saveContainerName).innerHTML = this.getBoardExport();
     }
     displayBoard = () => {
         let currentDiv = document.getElementById(this.containerName);
@@ -188,11 +212,25 @@ class Cell {
     elt = null;
     neibourghs = [];
     aliveNeibourgh = [];
-    constructor(x, y, alive, board) {
-        this.x = x;
-        this.y = y;
-        this.alive = alive;
+    constructor(save, x, y, alive, board) {
+        if (save === null) {
+            this.x = x;
+            this.y = y;
+            this.alive = alive;
+        } else {
+            this.x = x;
+            this.y = y;
+            this.alive = alive;
+        }
         this.board = board;
+
+    }
+    export = () => {
+        return {
+            x: this.x,
+            y: this.y,
+            alive: this.alive
+        }
     }
     setElement = (elt) => {
         this.elt = elt
