@@ -2,12 +2,12 @@
 
     display: flex;
 }
-.alive{
+.dead{
     height: 50px;
     min-width: 50px;
     border: 1px solid black;
 }
-.dead{
+.alive{
     height: 50px;
     min-width: 50px;
     border: 1px solid black;

@@ -17,12 +17,14 @@ class LifeGame {
 
 
 
-    
+
     passTurn = () => {
         this.turn++
         this.board.applyRule((cell, neibourghs) => {
-
-                    console.log(cell, neibourghs)
+                    if(neibourghs.length < 3){
+                        cell.die();
+                    }
+                    // console.log(cell, neibourghs)
         });
     }
 
@@ -32,6 +34,19 @@ class Board {
     xSize = 0;
     ySize = 0;
     
+
+    exportBoard = () => {
+        return {
+            board:this.board,
+            xSize:this.xSize
+        }
+    }
+    importBoard = (boardExport) => {
+        this.board = boardExport.board;
+    }
+
+    clickDown = false;
+
     board = null
     constructor(x,y){
 
@@ -78,12 +93,24 @@ class Board {
             for(let j = 0; j < this.xSize; j++){
             cell = this.getCell(j,i)
             newDiv = document.createElement("div");
-            newDiv.className = cell.isAlive() ? "dead" : "alive";
+            newDiv.className = cell.isAlive() ? "alive": "dead";
             cell.setElement(newDiv);
             // newContent = document.createTextNode(cell.isAlive() ? 'X' : "O");
         // add the text node to the newly created div
             // newDiv.appendChild(newContent);
             newDiv.addEventListener("click", this.getCell(j,i).click)
+        //     newDiv.addEventListener("mousedown", () => {
+        //         this.clickDown = true;
+        //     });
+        //    newDiv.addEventListener("mouseup", () => {
+        //         this.clickDown = false;
+        //     });
+        //     newDiv.addEventListener("mouseenter", () => {
+                
+        //         if(){
+                    
+        //         }
+        //         this.getCell(j,i).mousedown})
             
             
             // newDiv.className = "case";
@@ -134,9 +161,9 @@ class Board {
                 callback(cell,this.getAliveNeibourgh(cell))
             })
         })
+        this.refreshBoard()
+
     }
-
-
 refreshBoard = () => {
         let currentDiv = document.getElementById("board");;
         let cell = null;
@@ -144,7 +171,7 @@ refreshBoard = () => {
             for(let j = 0; j < this.xSize; j++){
                 cell = this.getCell(j,i)
                 
-                cell.getElement().className = cell.isAlive() ? "dead" : "alive";
+                cell.getElement().className = cell.isAlive() ?  "alive" :"dead";
             }
 
 
@@ -178,9 +205,16 @@ class Cell {
     isAlive = () => {
         return this.alive;
     }
+    mousedown = () => {
+        console.log("MouseDown")
+        this.click()
+    }
     click = () => {
         this.alive = !this.alive
         this.board.refreshBoard()
+    }
+    die  = () => {
+        this.alive = false;
     }
 }
 
