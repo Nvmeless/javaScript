@@ -1,39 +1,31 @@
-class LifeGame {
 
-    toto = 5;
+class LifeGame {
     board = null;
     turn = 0;
-    constructor(x,y,containerName ){
-        this.board = new Board(x,y, containerName);
-
-
+    constructor(x, y, containerName) {
+        this.board = new Board(x, y, containerName);
         this.board.displayBoard();
-        this.createTestBoard();
-        //  this.board.applyRule((cell, neibourghs) => {
-
-        //             console.log(cell, neibourghs)
-        // });
     }
-
-
-        createTestBoard = () => {
-            let  datas = this.board.exportBoard()
-            let lifeGame = new Board(datas.xSize, datas.ySize, 'boardTest')
-            lifeGame.importBoard(datas);
-            lifeGame.displayBoard();
-    }   
-
 
     passTurn = () => {
         this.turn++
-        this.board.applyRule((cell, neibourghs) => {
-                    if(neibourghs.length < 3){
-                        cell.die();
-                    } else {
-                        // cell.die()
-                    }
-                    console.log(cell, neibourghs)
+
+        this.board.setNeibourghs();
+
+        this.board.applyRule((cell) => {
+            let neibourghs = cell.getAliveNeibourgh()
+            if (neibourghs.length < 2) {
+                cell.die();
+            }
+            if (neibourghs.length === 3) {
+                cell.born()
+            }
+            if (neibourghs.length > 3) {
+                cell.die()
+            }
         });
+        // this.board.displaySave();
+        this.board.refreshBoard();
     }
 
 }
@@ -41,96 +33,90 @@ class LifeGame {
 class Board {
     xSize = 0;
     ySize = 0;
-    
-
-    exportBoard = () => {
-        return {
-            board:this.board,
-            ySize:this.ySize,
-            xSize:this.xSize
-        }
-    }
-    importBoard = (boardExport) => {
-        this.board = boardExport.board;
-        
-    }
-
+    saveContainerName = "save";
     clickDown = false;
-containerName = 'board'
+    containerName = 'board'
     board = null
-    constructor(x,y, containerName = "board"){
+
+
+    constructor(x, y, containerName = "board") {
         this.containerName = containerName;
         this.xSize = x;
         this.ySize = y;
 
         this.createBoard();
-       
+
     }
 
     createBoard = () => {
         this.board = [];
         let row = [];
-        for(let i = 0; i < this.ySize ; i++){
+        for (let i = 0; i < this.ySize; i++) {
             row = [];
-            for(let j = 0; j < this.xSize; j++){
-            
-                row.push(new Cell(j,i,(Math.random() > 1), this))
+            for (let j = 0; j < this.xSize; j++) {
+
+                row.push(new Cell(j, i, (Math.random() > .8), this))
 
             }
             this.board.push(row);
         }
-    } 
-       
+    }
+
+    exportBoard = () => {
+        return {
+            board: this.board,
+            ySize: this.ySize,
+            xSize: this.xSize
+        }
+    }
+    getBoardExport = () => {
+
+        console.log(this.exportBoard());
+        // return JSON.stringify(this.exportBoard());
+    }
+
+
+    importBoard = (boardExport) => {
+        this.board = boardExport.board;
+    }
+
+
+
     getCell = (x, y) => {
-        if(x >= 0 && y >= 0 && y < this.ySize && x < this.xSize ){
+        if (x >= 0 && y >= 0 && y < this.ySize && x < this.xSize) {
             return this.board[y][x];
         }
         return null
     }
-
-
-
+    displaySave = () => {
+        document.getElementById(this.saveContainerName).innerHTML(this.getBoardExport());
+    }
     displayBoard = () => {
         let currentDiv = document.getElementById(this.containerName);
+        currentDiv.innerHTML = "";
         let newDiv = null;
         let newContent = null;
         let newDivRow = null;
         let cell = null;
-        for(let i = 0; i < this.ySize ; i++){
-        newDivRow = document.createElement("div")
-        
-        newDivRow.className =  "row";
-            for(let j = 0; j < this.xSize; j++){
-            cell = this.getCell(j,i)
-            newDiv = document.createElement("div");
-            newDiv.className = cell.isAlive() ? "alive": "dead";
-            cell.setElement(newDiv);
-            // newContent = document.createTextNode(cell.isAlive() ? 'X' : "O");
-        // add the text node to the newly created div
-            // newDiv.appendChild(newContent);
-            newDiv.addEventListener("click", this.getCell(j,i).click)
-        //     newDiv.addEventListener("mousedown", () => {
-        //         this.clickDown = true;
-        //     });
-        //    newDiv.addEventListener("mouseup", () => {
-        //         this.clickDown = false;
-        //     });
-        //     newDiv.addEventListener("mouseenter", () => {
-                
-        //         if(){
-                    
-        //         }
-        //         this.getCell(j,i).mousedown})
-            
-            
-            // newDiv.className = "case";
-            newDivRow.appendChild(newDiv);
+        for (let i = 0; i < this.ySize; i++) {
+            newDivRow = document.createElement("div")
+
+            newDivRow.className = "row";
+            for (let j = 0; j < this.xSize; j++) {
+                cell = this.getCell(j, i)
+                newDiv = document.createElement("div");
+                newDiv.className = cell.isAlive() ? "alive" : "dead";
+                cell.setElement(newDiv);
+
+                newDiv.addEventListener("click", this.getCell(j, i).click)
+
+                newDivRow.appendChild(newDiv);
 
             }
-        currentDiv.appendChild(newDivRow);
+            currentDiv.appendChild(newDivRow);
 
-        
-    }
+
+        }
 
 
 
@@ -140,18 +126,18 @@ containerName = 'board'
         // cell.x, cell.y
         let x = cell.x;
         let y = cell.y;
-        let cells = []; 
+        let cells = [];
         let currentCell;
-        for(let i = -1; i <=1 ; i++){
-        for(let j = -1; j <=1 ; j++){
-            if(i !== 0 || j !==0){
-                currentCell = this.getCell(x + i,y + j);
-                if(currentCell && currentCell !== null){
-                    cells.push(currentCell);
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i !== 0 || j !== 0) {
+                    currentCell = this.getCell(x + i, y + j);
+                    if (currentCell && currentCell !== null) {
+                        cells.push(currentCell);
+                    }
                 }
             }
-        }
-       
+
         }
         return cells
     }
@@ -164,41 +150,45 @@ containerName = 'board'
             return neibourgh.isAlive();
         });
     }
-    
+
+    setNeibourghs = () => {
+        this.applyRule((cell) => {
+            cell.setAliveNeibourgh(this.getAliveNeibourgh(cell));
+            cell.setNeibourghs(this.getNeibourgh(cell));
+        })
+    }
+
+
     applyRule = (callback) => {
-        this.board.map((x) =>{
-            x.map((cell) =>{
-                callback(cell,this.getAliveNeibourgh(cell))
+        this.board.map((x) => {
+            x.map((cell) => {
+                callback(cell)
             })
         })
-        this.refreshBoard()
 
     }
-refreshBoard = () => {
-        let currentDiv = document.getElementById("board");;
+    refreshBoard = () => {
         let cell = null;
-        for(let i = 0; i < this.ySize ; i++){
-            for(let j = 0; j < this.xSize; j++){
-                cell = this.getCell(j,i)
-                
-                cell.getElement().className = cell.isAlive() ?  "alive" :"dead";
+        for (let i = 0; i < this.ySize; i++) {
+            for (let j = 0; j < this.xSize; j++) {
+                cell = this.getCell(j, i)
+
+                cell.getElement().className = cell.isAlive() ? "alive" : "dead";
             }
 
 
-            }
-
-        
+        }
     }
-
-    
 }
 
 
 
 class Cell {
-    alive= false;
+    alive = false;
     elt = null;
-    constructor(x,y, alive,board){
+    neibourghs = [];
+    aliveNeibourgh = [];
+    constructor(x, y, alive, board) {
         this.x = x;
         this.y = y;
         this.alive = alive;
@@ -206,28 +196,45 @@ class Cell {
     }
     setElement = (elt) => {
         this.elt = elt
-        
+
     }
-     getElement = () => {
+    getElement = () => {
         return this.elt
-        
+
     }
     isAlive = () => {
         return this.alive;
     }
     mousedown = () => {
-        console.log("MouseDown")
         this.click()
     }
     click = () => {
         this.alive = !this.alive
         this.board.refreshBoard()
     }
-    die  = () => {
+
+    die = () => {
         this.alive = false;
     }
-    born  = () => {
+
+    born = () => {
         this.alive = true;
+    }
+
+    setNeibourghs = (neibourghs) => {
+        this.neibourghs = neibourghs;
+    }
+    setAliveNeibourgh = (aliveNeibourgh) => {
+        this.aliveNeibourgh = aliveNeibourgh;
+    }
+
+    getAliveNeibourgh = () => {
+        return this.aliveNeibourgh;
+        // return this.neibourghs.filter(neibourgh => neibourgh.isAlive())
+    }
+
+    getNeibourgh = () => {
+        return this.neibourghs;
     }
 }
 
