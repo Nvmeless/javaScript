@@ -3,11 +3,12 @@ class LifeGame {
     toto = 5;
     board = null;
     turn = 0;
-    constructor(x,y ){
-        this.board = new Board(x,y);
+    constructor(x,y,containerName ){
+        this.board = new Board(x,y, containerName);
 
 
         this.board.displayBoard();
+        this.createTestBoard();
         //  this.board.applyRule((cell, neibourghs) => {
 
         //             console.log(cell, neibourghs)
@@ -15,7 +16,12 @@ class LifeGame {
     }
 
 
-
+        createTestBoard = () => {
+            let  datas = this.board.exportBoard()
+            let lifeGame = new Board(datas.xSize, datas.ySize, 'boardTest')
+            lifeGame.importBoard(datas);
+            lifeGame.displayBoard();
+    }   
 
 
     passTurn = () => {
@@ -23,8 +29,10 @@ class LifeGame {
         this.board.applyRule((cell, neibourghs) => {
                     if(neibourghs.length < 3){
                         cell.die();
+                    } else {
+                        // cell.die()
                     }
-                    // console.log(cell, neibourghs)
+                    console.log(cell, neibourghs)
         });
     }
 
@@ -38,18 +46,20 @@ class Board {
     exportBoard = () => {
         return {
             board:this.board,
+            ySize:this.ySize,
             xSize:this.xSize
         }
     }
     importBoard = (boardExport) => {
         this.board = boardExport.board;
+        
     }
 
     clickDown = false;
-
+containerName = 'board'
     board = null
-    constructor(x,y){
-
+    constructor(x,y, containerName = "board"){
+        this.containerName = containerName;
         this.xSize = x;
         this.ySize = y;
 
@@ -81,7 +91,7 @@ class Board {
 
 
     displayBoard = () => {
-        let currentDiv = document.getElementById("board");
+        let currentDiv = document.getElementById(this.containerName);
         let newDiv = null;
         let newContent = null;
         let newDivRow = null;
@@ -215,6 +225,9 @@ class Cell {
     }
     die  = () => {
         this.alive = false;
+    }
+    born  = () => {
+        this.alive = true;
     }
 }
 
