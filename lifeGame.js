@@ -75,6 +75,11 @@ class Board {
         
     }
 
+    //Function Get AllVoisin (Recupere les cases voisine d'une case x,y)
+
+
+
+    //Function qui verifie si la case doit etre vivante en fonction de ses 8 voisins
     }
 
 refreshBoard = () => {
